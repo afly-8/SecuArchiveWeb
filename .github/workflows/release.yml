@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:
@@ -45,12 +47,13 @@ jobs:
             OUTPUT_NAME="${OUTPUT_NAME}.exe"
           fi
           GOOS=$GOOS GOARCH=$ARCH go build -ldflags="-s -w -X main.version=${{ steps.get_tag.outputs.TAG }}" -o "${OUTPUT_NAME}" ./cmd/server
+          ls -la
 
       - name: Upload release asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          files: |
+          file: |
             secuarchive-web-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,10 +72,11 @@ jobs:
           path: release
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: SecuArchiveWeb v${{ github.ref_name }}
+          files: release/*
           body: |
             ## SecuArchiveWeb 安全服务报告归档系统
 
