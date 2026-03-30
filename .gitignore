@@ -1,0 +1,11 @@
+.idea/
+data/
+secuarchive-web
+server.log
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
