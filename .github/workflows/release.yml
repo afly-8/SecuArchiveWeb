@@ -42,53 +42,15 @@ jobs:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
         run: |
-          OUTPUT_NAME="secuarchive-web-${{ matrix.os }}-${{ matrix.arch }}"
-          if [ "${{ matrix.os }}" = "windows" ]; then
-            OUTPUT_NAME="${OUTPUT_NAME}.exe"
-          fi
-          GOOS=$GOOS GOARCH=$ARCH go build -ldflags="-s -w -X main.version=${{ steps.get_tag.outputs.TAG }}" -o "${OUTPUT_NAME}" ./cmd/server
+          OUTPUT_NAME="secuarchive-web-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
+          GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=${{ steps.get_tag.outputs.TAG }}" -o "${OUTPUT_NAME}" ./cmd/server
           ls -la
 
-      - name: Upload release asset
+      - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          file: |
+          files: |
             secuarchive-web-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    if: startsWith(github.ref, 'refs/tags/')
-
-    steps:
-      - name: Download all assets
-        uses: actions/download-artifact@v4
-        with:
-          path: release
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: SecuArchiveWeb v${{ github.ref_name }}
-          files: release/*
-          body: |
-            ## SecuArchiveWeb 安全服务报告归档系统
-
-            ### 支持平台
-            - Linux amd64
-            - Linux arm64
-            - Windows amd64
-
-            ### 使用方法
-            1. 解压对应平台的压缩包
-            2. 运行 `secuarchive-web` (Linux) 或 `secuarchive-web.exe` (Windows)
-            3. 访问 http://localhost:8080
-            4. 默认账号: admin / admin123
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
