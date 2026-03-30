@@ -33,17 +33,10 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Get tag
-        id: get_tag
-        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
       - name: Build
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
         run: |
-          OUTPUT_NAME="secuarchive-web-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
-          GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=${{ steps.get_tag.outputs.TAG }}" -o "${OUTPUT_NAME}" ./cmd/server
+          OUTPUT_NAME="secuarchive-web-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}"
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -ldflags="-s -w" -o "${OUTPUT_NAME}" ./cmd/server
           ls -la
 
       - name: Upload Release Asset
